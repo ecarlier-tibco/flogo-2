@@ -1,13 +1,14 @@
 package js
 
 import (
+	"fmt"
 	"io/ioutil"
 	"testing"
 
 	"github.com/TIBCOSoftware/flogo-contrib/action/flow/test"
 	"github.com/TIBCOSoftware/flogo-lib/core/activity"
-	"github.com/stretchr/testify/assert"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/stretchr/testify/assert"
 )
 
 var activityMetadata *activity.Metadata
@@ -46,43 +47,40 @@ func TestEval_InputVars(t *testing.T) {
 	inputVar := make(map[string]interface{}, 2)
 	inputVar["n1"] = 2
 	inputVar["n2"] = 3
-	tc.SetInput(ivInputVars, inputVar)
-	tc.SetInput(ivJs, `jsInput.n1 + jsInput.n2`)
+	fmt.Printf("JavaScript Input Var Value: %v\n", inputVar)
+	tc.SetInput(ivActivityInput, inputVar)
+	tc.SetInput(ivJsInputVarName, "msg")
+	tc.SetInput(ivJs, `var total = msg.n1 + msg.n2;`)
+	tc.SetInput(ivJsOutputVarName, "total")
 	ok, err := act.Eval(tc)
 	assert.NoError(t, err)
 
 	if ok {
-		sum, _ := data.CoerceToInteger(tc.GetOutput(ovOutput))
+		sum, _ := data.CoerceToInteger(tc.GetOutput(ovActitvityOutput))
 		assert.Equal(t, 5, sum)
 	}
 
-}
+	// test node-red function
+	inputVar = map[string]interface{}{
+		"req": map[string]interface{}{
+			"params": map[string]interface{}{
+				"firstname": "Eric",
+			},
+		},
+		"payload": map[string]interface{}{},
+	}
 
-func TestEval_OutputVars(t *testing.T) {
+	fmt.Printf("JavaScript Input Var Value: %v\n", inputVar)
+	tc.SetInput(ivActivityInput, inputVar)
+	tc.SetInput(ivJs, "if (msg.req.params.firstname == 'Eric') {\n    msg.payload.Name = 'Carlier';\n}\nelse {\n    msg.payload.Name = 'Unknown';\n}\nmsg.statusCode = 200;")
+	tc.SetInput(ivJsInputVarName, "msg")
+	tc.SetInput(ivJsOutputVarName, "msg")
 
-	act := NewActivity(getActivityMetadata())
-	tc := test.NewTestActivityContext(getActivityMetadata())
-
-	//Set input variables
-	inputVar := make(map[string]interface{}, 2)
-	inputVar["n1"] = 2
-	inputVar["n2"] = 3
-	tc.SetInput(ivInputVars, inputVar)
-
-	//Set JS code
-	tc.SetInput(ivJs, `var jsOutput = {}; jsOutput["sum"] = jsInput.n1 + jsInput.n2; jsOutput["result"] = "Sum is " + jsOutput["sum"];`)
-
-	success, err := act.Eval(tc)
+	ok, err = act.Eval(tc)
 	assert.NoError(t, err)
 
-	if success {
-		output, ok := tc.GetOutput(ovOutput).(map[string]interface{})
-		assert.True(t, ok)
-
-		sum, _ := data.CoerceToInteger(output["sum"])
-		assert.Equal(t, 5, sum)
-
-		result, _ := data.CoerceToString(output["result"])
-		assert.Equal(t, "Sum is 5", result)
+	if ok {
+		fmt.Printf("Return :%v\n", tc.GetOutput(ovActitvityOutput))
 	}
+
 }
