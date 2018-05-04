@@ -1,7 +1,7 @@
 {
   "name": "flogo-javascript",
   "type": "flogo:activity",
-  "ref": "ecarlier-tibco/flogo-2/activity/js",
+  "ref": "github.com/ecarlier-tibco/flogo-2/activity/js",
   "version": "0.0.1",
   "title": "JavaScript Activity",
   "description": "Run embedded JavaScript code",

@@ -8,7 +8,7 @@ import (
 	"github.com/robertkrimen/otto"
 )
 
-var activityLog = logger.GetLogger("activity-vijay-js")
+var activityLog = logger.GetLogger("activity-ecarlier-js")
 
 const (
 	ivActivityInput   = "jsIn"
